@@ -6,23 +6,17 @@ jobs:
   generate-challenge:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Fetch random Vue coding challenge from external API
       - name: Fetch Challenge
         id: fetch_challenge
         run: |
-          # Send a GET request to an external API that provides random Vue coding challenges
           challenge_data=$(curl -s https://example.com/api/random-vue-challenge)
-          # Extract the title and description from the API response
           challenge_title=$(echo "$challenge_data" | jq -r '.title')
           challenge_description=$(echo "$challenge_data" | jq -r '.description')
-          # Set the output variables to be used in the next step
           echo "::set-output name=title::$challenge_title"
           echo "::set-output name=description::$challenge_description"
 
-      # Step 2: Create issue in the repository with the fetched challenge
       - name: Create Issue
         run: |
-          # Send a POST request to GitHub's REST API to create an issue
           headers="-H 'Authorization: token ${{ secrets.YOUR_GITHUB_TOKEN }}' -H 'Accept: application/vnd.github.v3+json'"
           body="-d '{\"title\":\"${{ steps.fetch_challenge.outputs.title }}\",\"body\":\"${{ steps.fetch_challenge.outputs.description }}\"}'"
           url="https://api.github.com/repos/${{ github.repository }}/issues"

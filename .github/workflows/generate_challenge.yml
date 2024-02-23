@@ -6,22 +6,19 @@ jobs:
   generate-challenge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Generate Challenge
         id: generate_challenge
         run: |
           # Script to generate a random Vue coding challenge
           challenge_title="Vue Coding Challenge: Implement a simple todo list app"
           challenge_description="Create a Vue.js application that allows users to add, edit, and delete todo items. The app should have a form to add new todo items, a list to display existing todo items, and options to edit or delete each item."
-          echo "Challenge Title: $challenge_title" > challenge.txt
-          echo "Challenge Description: $challenge_description" >> challenge.txt
+          echo "::set-output name=title::$challenge_title"
+          echo "::set-output name=description::$challenge_description"
 
       - name: Create Issue
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.YOUR_GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"title":"New Vue Coding Challenge","body":"'"$(<challenge.txt)"'"}' \
-            "https://api.github.com/repos/${{ github.repository }}/issues"
+        uses: peter-evans/create-issue@v3
+        with:
+          title: ${{ steps.generate_challenge.outputs.title }}
+          body: ${{ steps.generate_challenge.outputs.description }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_TOKEN }}

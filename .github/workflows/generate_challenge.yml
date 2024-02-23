@@ -1,8 +1,6 @@
 name: Generate Vue Coding Challenge
 
-on:
-  schedule:
-    - cron: "0 0 * * *" # Run every day at midnight UTC
+on: push
 
 jobs:
   generate-challenge:

@@ -19,10 +19,9 @@ jobs:
           echo "Challenge Description: $challenge_description" >> challenge.txt
 
       - name: Create Issue
-        uses: peter-evans/create-issue@v3
-        with:
-          title: New Vue Coding Challenge
-          body: |
-            ${{ steps.generate_challenge.outputs.challenge_description }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.YOUR_GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"title":"New Vue Coding Challenge","body":"'"$(<challenge.txt)"'"}' \
+            "https://api.github.com/repos/${{ github.repository }}/issues"

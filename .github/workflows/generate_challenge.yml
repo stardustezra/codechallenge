@@ -1,23 +1,15 @@
 name: Generate Vue Coding Challenge
 
-on: push
+on:
+  schedule:
+    - cron: "0 0 * * *" # Run every day at midnight UTC
 
 jobs:
   generate-challenge:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     steps:
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: "16.x"
-
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v2
 
       - name: Generate Challenge
         id: generate_challenge
@@ -29,9 +21,10 @@ jobs:
           echo "Challenge Description: $challenge_description" >> challenge.txt
 
       - name: Create Issue
-        uses: peter-evans/create-issue-from-file@v3
+        uses: peter-evans/create-issue@v3
         with:
           title: New Vue Coding Challenge
-          content-filepath: challenge.txt
+          body: |
+            ${{ steps.generate_challenge.outputs.challenge_description }}
         env:
           GITHUB_TOKEN: ${{ secrets.YOUR_GITHUB_TOKEN }}

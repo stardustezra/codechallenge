@@ -1,4 +1,4 @@
-name: Generate Vue Coding Challenge
+name: Generate Random Vue Coding Challenge
 
 on: push
 
@@ -6,19 +6,24 @@ jobs:
   generate-challenge:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate Challenge
-        id: generate_challenge
+      # Step 1: Fetch random Vue coding challenge from external API
+      - name: Fetch Challenge
+        id: fetch_challenge
         run: |
-          # Script to generate a random Vue coding challenge
-          challenge_title="Vue Coding Challenge: Implement a simple todo list app"
-          challenge_description="Create a Vue.js application that allows users to add, edit, and delete todo items. The app should have a form to add new todo items, a list to display existing todo items, and options to edit or delete each item."
+          # Send a GET request to an external API that provides random Vue coding challenges
+          challenge_data=$(curl -s https://example.com/api/random-vue-challenge)
+          # Extract the title and description from the API response
+          challenge_title=$(echo "$challenge_data" | jq -r '.title')
+          challenge_description=$(echo "$challenge_data" | jq -r '.description')
+          # Set the output variables to be used in the next step
           echo "::set-output name=title::$challenge_title"
           echo "::set-output name=description::$challenge_description"
 
+      # Step 2: Create issue in the repository with the fetched challenge
       - name: Create Issue
         run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.YOUR_GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues \
-            -d "{\"title\":\"${{ steps.generate_challenge.outputs.title }}\",\"body\":\"${{ steps.generate_challenge.outputs.description }}\"}"
+          # Send a POST request to GitHub's REST API to create an issue
+          headers="-H 'Authorization: token ${{ secrets.YOUR_GITHUB_TOKEN }}' -H 'Accept: application/vnd.github.v3+json'"
+          body="-d '{\"title\":\"${{ steps.fetch_challenge.outputs.title }}\",\"body\":\"${{ steps.fetch_challenge.outputs.description }}\"}'"
+          url="https://api.github.com/repos/${{ github.repository }}/issues"
+          curl -X POST $headers $body $url
